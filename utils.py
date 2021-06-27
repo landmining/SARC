@@ -148,8 +148,8 @@ def is_bad_packet(packet_name, minimal_packets=False):
 
 
 # Reading config
-def load_config():
-    with open('config.json', 'r') as json_file:
+def load_config(path=None):
+    with open(path or 'config.json', 'r') as json_file:
         config = json.load(json_file)
         email = config['username']
         password = config['password']

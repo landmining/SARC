@@ -6,6 +6,7 @@ import utils
 import select
 import zipfile
 import datetime
+import argparse
 from packet import *
 
 
@@ -300,23 +301,36 @@ def run(config, email, password, debug, address):
     return should_restart
 
 
-config, email, password = utils.load_config()
-debug = config['debug_mode']
-address = (config['ip'], int(config['port']))
-while True:
-    try:
-        if not run(config, email, password, debug, address):
-            break
-        else:
-            print('Reconnecting...')
-    except Exception as e:
-        if debug:
-            print('Connection lost: ' + traceback.format_exc())
-        else:
-            print('Connection lost: ' + str(e))
-        if not config['auto_relog']:
-            break
-        else:
-            print('Reconnecting...')
-    time.sleep(3)
-print('Ending...')
+def main():
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('-c', '--config', dest='config_path', help='Config file path')
+    args = arg_parser.parse_args()
+
+    if not os.access(args.config_path, os.R_OK):
+        print('Invalid config path')
+        return
+
+    config, email, password = utils.load_config(args.config_path)
+    debug = config['debug_mode']
+    address = (config['ip'], int(config['port']))
+    while True:
+        try:
+            if not run(config, email, password, debug, address):
+                break
+            else:
+                print('Reconnecting...')
+        except Exception as e:
+            if debug:
+                print('Connection lost: ' + traceback.format_exc())
+            else:
+                print('Connection lost: ' + str(e))
+            if not config['auto_relog']:
+                break
+            else:
+                print('Reconnecting...')
+        time.sleep(3)
+    print('Ending...')
+
+
+if __name__ == '__main__':
+    main()
